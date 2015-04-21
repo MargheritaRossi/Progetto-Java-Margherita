@@ -1,0 +1,352 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package banca;
+import java.util.*;
+/**
+ *
+ * @author Margherita
+ * 
+ */
+public class Banca {
+   ArrayList <Conto> clienti;
+   Conto numero_conto;
+   private int tipo;
+    public Banca(){
+        this.clienti = new ArrayList<Conto>();
+        
+    }
+    
+    public void addConto(double numero_conto, String nome, String cognome, String CF){
+        int i = clienti.size()+1;
+        Conto bk = new Conto(numero_conto, nome,cognome, CF);
+        clienti.add(bk);
+    }
+    // Metodo che trasferisce una somma di denaro da un conto ad un altro
+     public boolean trasferisci(Conto n1, Conto n2, double importo, Date data){
+        Conto uscita = null;
+        Conto entrata = null; 
+
+        for(int j=0; j<clienti.size(); j++){
+            Conto temp = (Conto) clienti.get(j);
+            if(numero_conto==n1){
+                uscita = temp;
+            }
+            if(numero_conto==n2){
+                entrata = temp;
+            }
+        }
+        if(uscita!=null && entrata!=null){
+            uscita.prelievo(importo,data);
+            entrata.versamento(importo,data);
+            return true;
+        }
+        return false;
+    }
+    
+}
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package banca;
+
+
+import java.util.Date;
+
+/**
+ *
+ * @author Margherita
+ */
+
+public class Conto {
+    /*creo una variabile privata (affinchè la possa modificare solo questa 
+     * classe e per esser sicura le assegno il tipo double*/
+    private Persona intestatario;
+    private double saldo;
+    //private int numero;
+    private int tipo;
+    private double numero_conto;
+    private EstrattoConto[] movimenti;
+    // Attributo per consentire la numerazione progressiva dei conti
+    //private static int progressivoConti = 0;
+    /*Setto a 0,0 la variabile saldo*/
+    public Conto(double numero_conto, String n, String c, String s){
+         // Attribuisco un numero al conto e incremento il progressivo
+       // numero = progressivoConti++;
+        saldo = 0.0;
+        this.movimenti = new EstrattoConto[0];
+        this.intestatario=new Persona(n,c,s);
+        this.numero_conto=numero_conto;
+    }
+
+    /*Versamento che riceverà una variabile double "importo" in pratica al 
+     *saldo presente in conto va aggiunta la quantità da depositare. 
+     *Inoltre il metodo è void (non ritorna nulla)*/
+    public void versamento(double importo, Date data){
+        tipo=1;
+         /*ogni nuovo versamento deve comparire nell'estratto conto*/
+        EstrattoConto e = new EstrattoConto(importo, data, tipo);
+     
+                /*creo una lista dei movimenti*/
+		EstrattoConto[] nuovaListaMovimenti = new EstrattoConto[this.movimenti.length + 1];
+
+                /*System.arraycopy(this.movimenti, 0, nuovaListaMovimenti, 0, this.movimenti.length);*/
+                
+                for (int i=0; i < this.movimenti.length; i++)
+			nuovaListaMovimenti[i] = this.movimenti[i];
+                                
+		nuovaListaMovimenti[nuovaListaMovimenti.length - 1] = e;
+		this.movimenti = nuovaListaMovimenti;
+
+                /*calcolo effettivo del saldo dopo il versamento*/
+                saldo+= importo;
+    }
+    /*Prelievo*/
+    public void prelievo(double importo, Date data){
+        tipo=2;
+      
+        /*Inserisco un controllo. Se l'importo è <= Saldo è possibile prelevare*/
+        if(importo<=saldo){
+            /*ogni nuovo prelievo deve comparire nell'estratto conto*/
+            EstrattoConto e = new EstrattoConto(importo, data,tipo);
+                /*creo una lista dei movimenti*/
+		EstrattoConto[] nuovaListaMovimenti = new EstrattoConto[this.movimenti.length + 1];
+                /*System.arraycopy(this.movimenti, 0, nuovaListaMovimenti, 0, this.movimenti.length);*/
+                
+                for (int i=0; i < this.movimenti.length; i++)
+			nuovaListaMovimenti[i] = this.movimenti[i];
+                
+		nuovaListaMovimenti[nuovaListaMovimenti.length - 1] = e;
+		this.movimenti = nuovaListaMovimenti;
+                /*calcolo effettivo del saldo dopo il prelievo*/
+                saldo -= importo; 
+        }
+        else{
+            System.err.println("Saldo insufficiente. La somma da prelevare è maggiore del saldo presente");
+        }
+    }
+    
+    
+    public void aggiungiInteressi() {
+		if (this.saldo < 100)
+			return;
+		if ((this.saldo >= 100) && (this.saldo < 1000))
+			this.saldo = this.saldo*102/100;
+		if (this.saldo >= 1000)
+			this.saldo = this.saldo*104/100;
+	}
+    
+    
+    /*metodo per stampare la lista dei movimenti*/
+    public String stampaListaMovimenti() {
+        String str=new String();
+		for (int i=0; i < this.movimenti.length; i++)
+			str=str+" "+(this.movimenti[i]);
+                return str;
+	}
+	
+    @Override
+	public String toString() {
+		String descrizione = intestatario.getNome()+" "+intestatario.getCognome()+" "+ "conto corrente "  + " - SALDO: " + getSaldo();
+		return descrizione;
+	}
+    
+    /*Saldo. Il metodo è double visto che 
+     *restituisce il saldo (che è double)*/
+    public double getSaldo(){
+        return saldo;
+    }
+
+}
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package banca;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+/**
+ *
+ * @author Margherita
+ */
+
+        
+public class EstrattoConto {
+        /*Una operazione è composta da importo e data*/
+	private double importo;
+	private Date data;
+        private Conto saldo; 
+        private int tipo;
+
+	public EstrattoConto(double importo, Date data, int tipo){
+            /*Controllo se l'importo è 0 e in tal caso do errore*/
+		if (importo == 0)
+			throw new RuntimeException("Nota. Errore, si sta cercando di fare una operazione con importo uguale a 0");
+		this.importo = importo;
+		this.data = data;
+                this.tipo=tipo;
+	}
+
+        @Override
+	public String toString() {
+            /*descrizione dell'operazione svolta*/
+		String descrizione = "\nOperazione effettuata: ";
+		if (tipo == 1){
+                    //in caso di versamento
+			descrizione = descrizione + "VERSAMENTO € ";
+                }
+		else {
+                    //in caso di prelievo
+			descrizione = descrizione + "PRELIEVO € ";
+
+                }
+		descrizione = descrizione + this.importo + " - " + this.data;
+		return descrizione;
+	}	
+}
+
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package banca;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.*;
+/**
+ *
+ * @author Margherita
+ */
+public class test {
+    
+
+    
+    public static void main(String[] args){
+        int  t,s,p;
+        Banca clienti=new Banca();
+        String nome,cognome,CF;
+        boolean b=false;
+        double importo;
+        Scanner sc = new Scanner(System.in);
+        Persona intestatario;
+        double numero_conto=5000;
+        
+        //per recuperarmi data e ora 
+        Calendar calendario = Calendar.getInstance();
+        Date data =  calendario.getTime();
+        
+        System.out.println("Premi 1 per aprire un nuovo conto, 2 se vuoi accedere al tuo conto, 0 per uscire");
+        p=sc.nextInt();
+        if(p==1){
+            System.out.println("inserisci il tuo nome");
+            nome=sc.next();
+            System.out.println("nome:"+nome);
+            System.out.println("inserisci il tuo cognome");
+            cognome=sc.next();
+            System.out.println("nome2:"+cognome);
+            CF=" ";
+            intestatario=new Persona(nome, cognome, CF);
+            
+            System.out.println(intestatario.getCF());
+         
+         
+            clienti.addConto(numero_conto, nome, cognome, CF);
+            
+            numero_conto++;
+            b=true;
+            
+            do
+            {
+                System.out.println("che operazione vuoi fare?Premi 1 per versamento, per prelievo premi 2, per bonifico a terzi premi 3, per uscire premi 0");
+                t = sc.nextInt();
+
+                if (t==1)
+                {
+                    System.out.println("Inserisci importo");
+                    importo=sc.nextDouble();
+                    clienti.clienti.get(0).versamento(importo, data);
+                }
+                if(t==2)
+                {
+                    System.out.println("Inserisci importo");
+                    importo=sc.nextDouble();
+                    clienti.clienti.get(0).prelievo(importo, data);
+                    
+                }
+                if(t==3){
+                    System.out.println("Inserisci importo");
+                    importo=sc.nextDouble(); 
+                    clienti.trasferisci(clienti.numero_conto, clienti.numero_conto, 1, data);
+                    System.out.println("Operazione andata a buon fine");
+                }
+                System.out.println("Vuoi effettuare altre operazioni? 1 e 2");
+                s=sc.nextInt();
+                if (s==2)
+                {
+                    
+                  b=false;
+                }
+            }
+            while(b);
+                        
+            String str=  clienti.clienti.get(0).stampaListaMovimenti();
+            System.out.println(str);
+            System.out.println(clienti.clienti.get(0));
+            
+        }
+         
+        else{
+            if(p==2){
+                System.out.println("Vuoi accedere al tuo conto? riempi i campi richiesti");
+                System.out.println("inserisci il tuo nome");
+                nome=sc.next();
+                
+                System.out.println("inserisci il tuo cognome");
+                cognome=sc.next();
+                
+                System.out.println("inserisci il tuo CF");
+                CF=sc.next();
+                
+                intestatario=new Persona(nome, cognome, CF);
+                System.out.println("\n\n   ****************************************");
+                System.out.println("\nBenvenuto nella tua bancaonline");
+                System.out.println("Caro/a " + nome + ", benvenuto/a nella tua bancaonline!");
+                System.out.println();
+                
+               
+                
+            }
+            
+                else{
+                    System.out.println("Peccato, torna a trovarci!");
+                    return ;
+                }
+	
+        }
+        
+
+        //crea l'eccezione
+        try {
+			//conto1.prelievo(3000, "02/02/02");
+		}
+		catch(RuntimeException e) {
+			//System.out.println("Prelievo su c1 non riuscito: " + e.getMessage());
+		}
+      
+    }
+
+}
