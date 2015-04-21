@@ -23,10 +23,8 @@ import java.io.Serializable;
 public class Banca implements Serializable {
    ArrayList <Conto> clienti;
    /*cercare in arraylist hasnext cosi so la posizione dell'array*/
-   int numero_di_conto;
     private int tipo;
     public Banca(){
-        this.clienti = new ArrayList<Conto>();
         }
     
     public void addConto(int numero_conto, String nome, String cognome, String CF){
@@ -86,9 +84,7 @@ public class Banca implements Serializable {
    }
 
     
-    
-    
-    
+
     // Metodo che trasferisce una somma di denaro da un conto ad un altro
     /* public boolean trasferisci(Conto n1, Conto n2, double importo, Date data){
         Conto uscita = null;

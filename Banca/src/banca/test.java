@@ -28,7 +28,7 @@ public class test {
         Scanner sc = new Scanner(System.in);
         Persona intestatario;
         Conto conto_corrente;
-        int numero_conto;
+        int numero_conto=0;
                
         Banca file = new Banca();
         //per recuperarmi data e ora 
@@ -56,12 +56,12 @@ public class test {
             CF=sc.next();
             
             intestatario=new Persona(nome, cognome, CF);
-            conto_corrente= new Conto(1,intestatario.getNome() , intestatario.getCognome(), intestatario.getCF());
+            conto_corrente= new Conto(numero_conto,intestatario.getNome() , intestatario.getCognome(), intestatario.getCF());
             System.out.println(intestatario.getCF());
-         
+             System.out.println("FANCULO CITY");
             clienti.addConto(conto_corrente.getNumero(), intestatario.getNome() , intestatario.getCognome(), intestatario.getCF());
-            System.out.println("numero conto  "+conto_corrente.getNumero()+" "+intestatario.getNome()+" "+ intestatario.getCognome()+" "+ intestatario.getCF());
-            
+           System.out.println("numero conto  "+numero_conto);
+           numero_conto++;
             b=true;
             
             do
@@ -73,7 +73,7 @@ public class test {
                 {
                     System.out.println("Inserisci importo");
                     importo=sc.nextDouble();
-                    clienti.clienti.get(clienti.numero_di_conto).versamento(importo, data);
+                    //clienti.clienti.get(clienti.numero_di_conto).versamento(importo, data);
                 }
                 if(t==2)
                 {

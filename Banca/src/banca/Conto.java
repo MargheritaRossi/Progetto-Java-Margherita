@@ -21,7 +21,7 @@ public class Conto implements Serializable{
     //private int numero;
     private int tipo;
     private int interesse;
-    private int numero_di_conto;
+    private int numero_di_conto=0;
     private EstrattoConto[] movimenti;
    // private static long prossimoNumeroConto = 999;
     // Attributo per consentire la numerazione progressiva dei conti
@@ -33,8 +33,9 @@ public class Conto implements Serializable{
         saldo = 0.0;
        this.movimenti = new EstrattoConto[0];
        this.intestatario=new Persona(n,c,s);
-       this.numero_di_conto=numero_conto+1;
-        System.out.println(numero_di_conto);
+       System.out.println("ti inculo a fuoco"+this.numero_di_conto);
+       this.numero_di_conto=numero_conto;
+        
     }
 
     /*Versamento che riceverà una variabile double "importo" in pratica al 
